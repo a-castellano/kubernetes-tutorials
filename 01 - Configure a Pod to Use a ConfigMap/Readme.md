@@ -1,7 +1,4 @@
 # Configure a Pod to Use a ConfigMap
 
-## Create a ConfigMap
+[Tutorial Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
-```bash
-kubectl create configmap <map-name> <data-source>
-```
