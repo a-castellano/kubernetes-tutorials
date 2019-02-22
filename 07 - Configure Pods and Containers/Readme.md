@@ -164,17 +164,18 @@ kubectl delete namespace cpu-example
 
 ### Configure Quality of Service for Pods
 
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
+
+Create a nampespace
+```bash
+kubectl create namespace qos-example
+```
 #### Guaranteed
 
 For a Pod to be given a QoS class of Guaranteed:
 
 * Every Container in the Pod must have a memory limit and a memory request, and they must be the same.
 * Every Container in the Pod must have a CPU limit and a CPU request, and they must be the same.
-
-Create a nampespace
-```bash
-kubectl create namespace qos-example
-```
 
 Creates qos-pod
 ```bash
@@ -213,59 +214,46 @@ Delete pod
 kubectl delete pod qos-demo-2 --namespace=qos-example
 ```
 
+#### BestEffort
+
+For a Pod to be given a QoS class of BestEffort, the Containers in the Pod must not have any memory or CPU limits or requests.
+
+Create a pod
 ```bash
+kubectl create namespace qos-example
+namespace/qos-example created
 ```
 
+Examine the new pod
 ```bash
+kubectl get pod qos-demo-3 --namespace=qos-example --output=yaml | grep qosClass
+  qosClass: BestEffort
 ```
 
+Delete the pod
 ```bash
+kubectl delete pod qos-demo-3
 ```
 
+#### Create a Pod that has two Containers
+
+Create the pod
 ```bash
+kubectl create -f pods/qos/qos-pod-4.yaml
 ```
 
+Check that pod qos is Burstable:
 ```bash
+kubectl get pod qos-demo-4 --namespace=qos-example --output=yaml | grep qosClass
+  qosClass: Burstable
 ```
 
+Delete it
 ```bash
+kubectl delete pod qos-demo-4 --namespace=qos-example
 ```
 
+Clean up
 ```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
+kubectl delete namespace qos-example
 ```
