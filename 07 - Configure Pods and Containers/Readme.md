@@ -428,7 +428,7 @@ kubectl delete pod redis
 
 ### Configure a Pod to Use a Projected Volume for Storage
 
-[Link](Configure a Pod to Use a Projected Volume for Storage)
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-projected-volume-storage/)
 
 Create the Secrets:
 ```bash
