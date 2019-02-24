@@ -257,3 +257,196 @@ Clean up
 ```bash
 kubectl delete namespace qos-example
 ```
+
+## Assign Extended Resources to a Container
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/extended-resource/)
+
+### Assign an extended resource to a Pod
+
+```bash
+$ kubectl get pod extended-resource-demo
+NAME                     READY   STATUS    RESTARTS   AGE
+extended-resource-demo   0/1     Pending   0          3m49s
+```
+
+This does not work
+```bash
+$ kubectl describe pod extended-resource-demo
+Name:               extended-resource-demo
+Namespace:          default
+Priority:           0
+PriorityClassName:  <none>
+Node:               <none>
+Labels:             <none>
+Annotations:        <none>
+Status:             Pending
+IP:
+Containers:
+  extended-resource-demo-ctr:
+    Image:      nginx
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      example.com/dongle:  3
+    Requests:
+      example.com/dongle:  3
+    Environment:           <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-rf5pv (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False
+Volumes:
+  default-token-rf5pv:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-rf5pv
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason            Age                    From               Message
+  ----     ------            ----                   ----               -------
+  Warning  FailedScheduling  3m55s (x2 over 3m55s)  default-scheduler  0/2 nodes are available: 2 Insufficient example.com/dongle.
+```
+
+Now it works
+```bash
+$ kubectl get pod extended-resource-demo
+NAME                     READY   STATUS    RESTARTS   AGE
+extended-resource-demo   1/1     Running   0          18m
+```
+
+Get dongles.
+```bash
+Containers:
+  extended-resource-demo-ctr:
+    Container ID:   docker://c4a77012122b43b6949a7999c98a7ed0818181602ff7a981101e6ec937e431a9
+    Image:          nginx
+    Image ID:       docker-pullable://nginx@sha256:dd2d0ac3fff2f007d99e033b64854be0941e19a2ad51f174d9240dda20d9f534
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sun, 24 Feb 2019 18:11:43 +0100
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      example.com/dongle:  3
+    Requests:
+      example.com/dongle:  3
+```
+
+Attempt to created a second pod
+```bash
+kubectl create -f pods/resource/extended-resource-pod-2.yaml
+pod/extended-resource-demo-2 created
+```
+
+There are not enought dongles
+```bash
+kubectl describe pod extended-resource-demo-2
+
+Events:
+  Type     Reason            Age                    From               Message
+  ----     ------            ----                   ----               -------
+  Warning  FailedScheduling  2m31s (x2 over 2m31s)  default-scheduler  0/2 nodes are available: 2 Insufficient example.com/dongle.
+```
+
+Clean all
+```bash
+kubectl delete pod extended-resource-demo
+kubectl delete pod extended-resource-demo-2
+```
+
+### Configure a Pod to Use a Volume for Storage
+
+```
+An emptyDir volume is first created when a Pod is assigned to a Node, and exists as long as that Pod is running on that node.
+As the name says, it is initially empty. Containers in the Pod can all read and write the same files in the emptyDir volume,
+though that volume can be mounted at the same or different paths in each Container. When a Pod is removed from a node for any reason,
+the data in the emptyDir is deleted forever.
+```
+
+Configure a volume for a Pod
+```bash
+kubectl create -f  pods/storage/redis.yaml
+```
+
+Enter the pod
+```bash
+kubectl exec -it redis -- /bin/bash
+```
+
+Inside the container place a file
+```bash
+cd /data/redis/
+echo Hello > test-file
+```
+
+Install procps and kill redis
+```bash
+apt-get update
+apt-get install procps
+
+
+ps -aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+redis        1  0.1  0.0  50292  3992 ?        Ssl  19:51   0:00 redis-server *:6379
+root        19  0.0  0.0  18144  3204 pts/0    Ss   19:52   0:00 /bin/bash
+root       280  0.0  0.0  36640  2800 pts/0    R+   20:00   0:00 ps -aux
+root@redis:/data/redis# kill -9 1
+```
+
+Container restarts
+```bash
+$ kubectl get pod redis --watch
+NAME    READY   STATUS    RESTARTS   AGE
+redis   1/1     Running   0          92m
+redis   0/1   Completed   0     92m
+redis   1/1   Running   1     93m
+redis   0/1   Completed   1     103m
+redis   1/1   Running   2     103m
+```
+
+Get back to the new container
+```bash
+kubectl exec -it redis -- /bin/cat /data/redis/test-file
+Hello
+```
+
+Destroy the pod
+```bash
+kubectl delete pod redis
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
