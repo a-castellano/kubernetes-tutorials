@@ -362,6 +362,8 @@ kubectl delete pod extended-resource-demo-2
 
 ### Configure a Pod to Use a Volume for Storage
 
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
+
 ```
 An emptyDir volume is first created when a Pod is assigned to a Node, and exists as long as that Pod is running on that node.
 As the name says, it is initially empty. Containers in the Pod can all read and write the same files in the emptyDir volume,
@@ -389,7 +391,6 @@ Install procps and kill redis
 ```bash
 apt-get update
 apt-get install procps
-
 
 ps -aux
 USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
@@ -421,16 +422,40 @@ Destroy the pod
 kubectl delete pod redis
 ```
 
+### Configure a Pod to Use a PersistentVolume for Storage
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
+
+### Configure a Pod to Use a Projected Volume for Storage
+
+[Link](Configure a Pod to Use a Projected Volume for Storage)
+
+Create the Secrets:
 ```bash
+echo -n "admin" > ./username.txt
+echo -n "1f2d1e2e67df" > ./password.txt
+kubectl create secret generic user --from-file=./username.txt
+kubectl create secret generic pass --from-file=./password.txt
+```
+
+Create pod
+```bash
+kubectl create -f pods/storage/projected.yaml
+```
+
+Check secrets
+```bash
+kubectl exec -it test-projected-volume -- ls -l /projected-volume/
+total 0
+lrwxrwxrwx    1 root     root            19 Feb 24 21:02 password.txt -> ..data/password.txt
+lrwxrwxrwx    1 root     root            19 Feb 24 21:02 username.txt -> ..data/username.txt
 ```
 
 ```bash
-```
-
-```bash
-```
-
-```bash
+kubectl exec -it test-projected-volume -- cat /projected-volume/password.txt
+1f2d1e2e67df
+kubectl exec -it test-projected-volume -- cat /projected-volume/username.txt
+admin
 ```
 
 ```bash
