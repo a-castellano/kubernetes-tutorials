@@ -522,6 +522,135 @@ kubectl exec -it test-projected-volume -- cat /projected-volume/username.txt
 admin
 ```
 
+### Configure a Security Context for a Pod or Container
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
+
+#### Set the security context for a Pod
+
+Create the Pod:
+```bash
+kubectl create -f pods/security/security-context.yaml
+pod/security-context-demo created
+```
+
+It's running
+```bash
+kubectl get pod security-context-demo
+NAME                    READY   STATUS    RESTARTS   AGE
+security-context-demo   1/1     Running   0          39s
+```
+
+Confirm that UID is 1000:
+```bash
+kubectl exec -it security-context-demo -- ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+1000         1  0.0  0.0   4336   760 ?        Ss   05:27   0:00 /bin/sh -c node
+1000         7  0.0  0.3 772124 22776 ?        Sl   05:27   0:00 node server.js
+1000        20  0.0  0.0  17500  2052 pts/0    Rs+  05:28   0:00 ps aux
+```
+
+Verify that volumes are using fsGroup GID
+```bash
+kubectl exec -it security-context-demo -- ls -l /data
+total 4
+drwxrwsrwx 2 root 2000 4096 Feb 25 05:27 demo
+```
+
+Create a testFile:
+```bash
+kubectl exec -it security-context-demo -- sh
+cd /data/demo
+
+ls -l
+total 4
+-rw-r--r-- 1 1000 2000 6 Feb 25 05:37 test-file
+
+exit
+```
+
+#### Set the security context for a Container
+
+Security settings that you specify for a Container apply only to the individual Container, and they override settings made at the Pod level when there is overlap.
+
+Create a Pod:
+```bash
+kubectl create -f pods/security/security-context-2.yaml
+```
+
+Verify it:
+```bash
+kubectl get pod security-context-demo-2
+NAME                      READY   STATUS    RESTARTS   AGE
+security-context-demo-2   1/1     Running   0          32s
+```
+
+Check that Pod is using UID 2000:
+```bash
+kubectl exec -it security-context-demo-2 -- ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+2000         1  0.0  0.0   4336   756 ?        Ss   05:43   0:00 /bin/sh -c node
+2000         8  0.0  0.3 772124 22680 ?        Sl   05:43   0:00 node server.js
+2000        13  0.0  0.0  17500  2112 pts/0    Rs+  05:48   0:00 ps aux
+```
+
+#### Set capabilities for a Container
+
+Create a Pod without capabilities:
+```bash
+kubectl create -f pods/security/security-context-3.yaml
+```
+
+UID is root's one
+```bash
+kubectl exec -it security-context-demo-3 -- ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0   4336   724 ?        Ss   05:51   0:00 /bin/sh -c node
+root         8  0.1  0.3 772124 22780 ?        Sl   05:51   0:00 node server.js
+root        13  0.0  0.0  17500  2112 pts/0    Rs+  05:51   0:00 ps aux
+```
+
+Create a pod with capabilities:
+```bash
+kubectl create -f pods/security/security-context-4.yaml
+```
+
+### Configure Service Accounts for Pods
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
+
+#### Use the Default Service Account to access the API server
+#### Use Multiple Service Accounts
+#### Manually create a service account API token.
+#### Add ImagePullSecrets to a service account
+#### Service Account Token Volume Projection
+
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
 ```bash
 ```
 
