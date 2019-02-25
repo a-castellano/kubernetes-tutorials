@@ -426,6 +426,70 @@ kubectl delete pod redis
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
 
+Inside your node:
+```bash
+mkdir /mnt/data
+echo 'Hello from Kubernetes storage' > /mnt/data/index.html
+```
+
+Create PersistentVolume:
+```bash
+kubectl create -f pods/storage/pv-volume.yaml
+kubectl get pv task-pv-volume
+NAME             CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+task-pv-volume   1Gi        RWO            Retain           Available           manual                  5s
+```
+
+Now, create PersistentVolumeClaim:
+```bash
+kubectl create -f pods/storage/pv-claim.yaml
+```
+
+Check pv status
+```bash
+kubectl get pv task-pv-volume
+NAME             CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                   STORAGECLASS   REASON   AGE
+task-pv-volume   1Gi        RWO            Retain           Bound    default/task-pv-claim   manual                  3m44s
+```
+
+Get PersistentVolumeClaim info:
+```bash
+kubectl get pvc task-pv-claim
+NAME            STATUS   VOLUME           CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+task-pv-claim   Bound    task-pv-volume   1Gi        RWO            manual         72s
+```
+
+Create a pod which uses this PersistentVolumeClaim. From the Pod’s point of view, the claim is a volume.
+```bash
+kubectl create -f pods/storage/pv-pod.yaml
+```
+
+Verify pod:
+```bash
+kubectl get pod task-pv-pod
+NAME          READY   STATUS    RESTARTS   AGE
+task-pv-pod   1/1     Running   0          2m46s
+```
+
+Get a shell to the Container running in your Pod:
+```bash
+kubectl exec -it task-pv-pod -- /bin/bash
+```
+
+Verify that nginx is running.
+```bash
+apt-get update
+apt-get install curl
+curl localhost
+```
+
+Remove all:
+```bash
+kubectl delete pod task-pv-pod
+kubectl delete pvc task-pv-claim
+kubectl delete pv task-pv-volume
+```
+
 ### Configure a Pod to Use a Projected Volume for Storage
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-projected-volume-storage/)
@@ -456,6 +520,24 @@ kubectl exec -it test-projected-volume -- cat /projected-volume/password.txt
 1f2d1e2e67df
 kubectl exec -it test-projected-volume -- cat /projected-volume/username.txt
 admin
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
 ```
 
 ```bash
