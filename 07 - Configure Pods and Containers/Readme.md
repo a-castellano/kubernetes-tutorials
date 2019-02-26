@@ -162,7 +162,7 @@ kubectl delete pod cpu-demo-2 --namespace=cpu-example
 kubectl delete namespace cpu-example
 ```
 
-### Configure Quality of Service for Pods
+## Configure Quality of Service for Pods
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
 
@@ -170,7 +170,7 @@ Create a nampespace
 ```bash
 kubectl create namespace qos-example
 ```
-#### Guaranteed
+### Guaranteed
 
 For a Pod to be given a QoS class of Guaranteed:
 
@@ -192,7 +192,7 @@ Delete this pod
 kubectl delete pod qos-demo --namespace=qos-example
 ```
 
-#### Burstable
+### Burstable
 
 A Pod is given a QoS class of Burstable if:
 
@@ -214,7 +214,7 @@ Delete pod
 kubectl delete pod qos-demo-2 --namespace=qos-example
 ```
 
-#### BestEffort
+### BestEffort
 
 For a Pod to be given a QoS class of BestEffort, the Containers in the Pod must not have any memory or CPU limits or requests.
 
@@ -235,7 +235,7 @@ Delete the pod
 kubectl delete pod qos-demo-3
 ```
 
-#### Create a Pod that has two Containers
+### Create a Pod that has two Containers
 
 Create the pod
 ```bash
@@ -265,14 +265,14 @@ kubectl delete namespace qos-example
 ### Assign an extended resource to a Pod
 
 ```bash
-$ kubectl get pod extended-resource-demo
+kubectl get pod extended-resource-demo
 NAME                     READY   STATUS    RESTARTS   AGE
 extended-resource-demo   0/1     Pending   0          3m49s
 ```
 
 This does not work
 ```bash
-$ kubectl describe pod extended-resource-demo
+kubectl describe pod extended-resource-demo
 Name:               extended-resource-demo
 Namespace:          default
 Priority:           0
@@ -314,7 +314,7 @@ Events:
 
 Now it works
 ```bash
-$ kubectl get pod extended-resource-demo
+kubectl get pod extended-resource-demo
 NAME                     READY   STATUS    RESTARTS   AGE
 extended-resource-demo   1/1     Running   0          18m
 ```
@@ -360,7 +360,7 @@ kubectl delete pod extended-resource-demo
 kubectl delete pod extended-resource-demo-2
 ```
 
-### Configure a Pod to Use a Volume for Storage
+## Configure a Pod to Use a Volume for Storage
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
 
@@ -402,7 +402,7 @@ root@redis:/data/redis# kill -9 1
 
 Container restarts
 ```bash
-$ kubectl get pod redis --watch
+kubectl get pod redis --watch
 NAME    READY   STATUS    RESTARTS   AGE
 redis   1/1     Running   0          92m
 redis   0/1   Completed   0     92m
@@ -422,7 +422,7 @@ Destroy the pod
 kubectl delete pod redis
 ```
 
-### Configure a Pod to Use a PersistentVolume for Storage
+## Configure a Pod to Use a PersistentVolume for Storage
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)
 
@@ -490,7 +490,7 @@ kubectl delete pvc task-pv-claim
 kubectl delete pv task-pv-volume
 ```
 
-### Configure a Pod to Use a Projected Volume for Storage
+## Configure a Pod to Use a Projected Volume for Storage
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-projected-volume-storage/)
 
@@ -522,12 +522,12 @@ kubectl exec -it test-projected-volume -- cat /projected-volume/username.txt
 admin
 ```
 
-### Configure a Security Context for a Pod or Container
+## Configure a Security Context for a Pod or Container
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 
 
-#### Set the security context for a Pod
+### Set the security context for a Pod
 
 Create the Pod:
 ```bash
@@ -570,7 +570,7 @@ total 4
 exit
 ```
 
-#### Set the security context for a Container
+### Set the security context for a Container
 
 Security settings that you specify for a Container apply only to the individual Container, and they override settings made at the Pod level when there is overlap.
 
@@ -595,7 +595,7 @@ USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 2000        13  0.0  0.0  17500  2112 pts/0    Rs+  05:48   0:00 ps aux
 ```
 
-#### Set capabilities for a Container
+### Set capabilities for a Container
 
 Create a Pod without capabilities:
 ```bash
@@ -616,11 +616,11 @@ Create a pod with capabilities:
 kubectl create -f pods/security/security-context-4.yaml
 ```
 
-### Configure Service Accounts for Pods
+## Configure Service Accounts for Pods
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 
-#### Use the Default Service Account to access the API server
+### Use the Default Service Account to access the API server
 
 By default, servie account is 'default'
 
@@ -629,7 +629,7 @@ kubectl get pods redis -o yaml | grep serviceAccountName
   serviceAccountName: default
 ```
 
-#### Use Multiple Service Accounts
+### Use Multiple Service Accounts
 
 Get service accounts:
 ```bash
@@ -672,7 +672,7 @@ Delete service account:
 kubectl delete serviceaccount/build-robot
 ```
 
-#### Manually create a service account API token.
+### Manually create a service account API token.
 
 Create service account again:
 ```bash
@@ -715,7 +715,7 @@ token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2V
 ca.crt:     1094 bytes
 ```
 
-#### Add ImagePullSecrets to a service account
+### Add ImagePullSecrets to a service account
 
 Create a secret:
 ```bash
@@ -734,12 +734,12 @@ Modify the default service account for the namespace to use this secret as an im
 kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "myregistrykey"}]}'
 ```
 
-### Configure Liveness and Readiness Probes
+## Configure Liveness and Readiness Probes
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
 
 
-#### Define a liveness command
+### Define a liveness command
 
 Create the pod:
 ```bash
@@ -793,11 +793,11 @@ goproxy   0/1     Running   0          6s
 goproxy   1/1   Running   0     13s
 ```
 
-### Assign Pods to Nodes
+## Assign Pods to Nodes
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/)
 
-#### Add a label to a node
+### Add a label to a node
 
 Get nodes:
 ```bash
@@ -821,7 +821,7 @@ kubectl get nodes --show-labels | grep disk
 kubernetes-minion-group-9g79   Ready                      <none>   5m38s   v1.13.3   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/fluentd-ds-ready=true,beta.kubernetes.io/instance-type=n1-standard-2,beta.kubernetes.io/os=linux,disktype=ssd,failure-domain.beta.kubernetes.io/region=us-central1,failure-domain.beta.kubernetes.io/zone=us-central1-b,kubernetes.io/hostname=kubernetes-minion-group-9g79
 ```
 
-#### Create a pod that gets scheduled to your chosen node
+### Create a pod that gets scheduled to your chosen node
 
 Create the pod:
 ```bash
@@ -835,11 +835,11 @@ NAME    READY   STATUS    RESTARTS   AGE   IP          NODE                     
 nginx   1/1     Running   0          35s   10.64.2.5   kubernetes-minion-group-9g79   <none>           <none>
 ```
 
-### Configure Pod Initialization
+## Configure Pod Initialization
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-initialization/)
 
-#### Create a Pod that has an Init Container
+### Create a Pod that has an Init Container
 
 Create the pod:
 ```bash
@@ -859,11 +859,11 @@ apt-get install curl
 curl localhost
 ```
 
-### Attach Handlers to Container Lifecycle Events
+## Attach Handlers to Container Lifecycle Events
 
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/)
 
-#### Define postStart and preStop handlers
+### Define postStart and preStop handlers
 
 Create the pod:
 ```bash
@@ -876,44 +876,219 @@ kubectl exec -it lifecycle-demo -- cat /usr/share/message
 Hello from the postStart handler
 ```
 
+## Configure a Pod to Use a ConfigMap
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+
+### Create a ConfigMap
+
+Get files:
 ```bash
+mkdir -p configure-pod-container/configmap/kubectl/
+wget https://k8s.io/docs/tasks/configure-pod-container/configmap/kubectl/game.properties -O configure-pod-container/configmap/kubectl/game.properties
+wget https://k8s.io/docs/tasks/configure-pod-container/configmap/kubectl/ui.properties -O configure-pod-container/configmap/kubectl/ui.properties
 ```
 
+Create config map from files:
 ```bash
+kubectl create configmap game-config --from-file=configure-pod-container/configmap/kubectl/
 ```
 
+Verify configmap
 ```bash
+kubectl describe configmaps game-config
+
+Name:         game-config
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+game.properties:
+----
+enemies=aliens
+lives=3
+enemies.cheat=true
+enemies.cheat.level=noGoodRotten
+secret.code.passphrase=UUDDLRLRBABAS
+secret.code.allowed=true
+secret.code.lives=30
+ui.properties:
+----
+color.good=purple
+color.bad=yellow
+allow.textmode=true
+how.nice.to.look=fairlyNice
+
+Events:  <none>
 ```
 
-```bash
-```
+### Create ConfigMaps from files
 
 ```bash
+kubectl create configmap game-config-2 --from-file=configure-pod-container/configmap/kubectl/game.properties
+kubectl describe configmaps game-config-2
+Name:         game-config-2
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+game.properties:
+----
+enemies=aliens
+lives=3
+enemies.cheat=true
+enemies.cheat.level=noGoodRotten
+secret.code.passphrase=UUDDLRLRBABAS
+secret.code.allowed=true
+secret.code.lives=30
+Events:  <none>
 ```
 
+Create a ConfigMap from an env-file
 ```bash
+kubectl create configmap game-config-env-file --from-env-file=configure-pod-container/configmap/kubectl/game-env-file.properties
+
+kubectl get configmap game-config-env-file -o yaml
+apiVersion: v1
+data:
+  allowed: '"true"'
+  enemies: aliens
+  lives: "3"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2019-02-26T07:05:39Z"
+  name: game-config-env-file
+  namespace: default
+  resourceVersion: "2271866"
+  selfLink: /api/v1/namespaces/default/configmaps/game-config-env-file
+  uid: ec81b486-3994-11e9-a452-5254000baa03
 ```
 
-```bash
-```
+When passing --from-env-file multiple times to create a ConfigMap from multiple data sources, only the last env-file is used:
+
+### Define the key to use when creating a ConfigMap from a file
 
 ```bash
+kubectl create configmap game-config-3 --from-file=game-special-key=configure-pod-container/configmap/kubectl/game.properties
+kubectl get configmaps game-config-3 -o yaml
+
+kubectl get configmaps game-config-3 -o yaml
+apiVersion: v1
+data:
+  game-special-key: |-
+    enemies=aliens
+    lives=3
+    enemies.cheat=true
+    enemies.cheat.level=noGoodRotten
+    secret.code.passphrase=UUDDLRLRBABAS
+    secret.code.allowed=true
+    secret.code.lives=30
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2019-02-26T07:07:56Z"
+  name: game-config-3
+  namespace: default
+  resourceVersion: "2272031"
+  selfLink: /api/v1/namespaces/default/configmaps/game-config-3
+  uid: 3e1df533-3995-11e9-a452-5254000baa03
 ```
 
-```bash
-```
+### Create ConfigMaps from literal values
 
 ```bash
+kubectl create configmap special-config --from-literal=special.how=very --from-literal=special.type=charm
+kubectl get configmaps special-config -o yaml
+
+apiVersion: v1
+data:
+  special.how: very
+  special.type: charm
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2019-02-26T07:15:07Z"
+  name: special-config
+  namespace: default
+  resourceVersion: "2272560"
+  selfLink: /api/v1/namespaces/default/configmaps/special-config
+  uid: 3f003906-3996-11e9-a452-5254000baa03
 ```
 
-```bash
-```
+### Define container environment variables using ConfigMap data
 
 ```bash
+kubectl delete configmap special-config
+kubectl create configmap special-config --from-literal=special.how=very
 ```
 
+Create the pod:
 ```bash
+kubectl create -f pods/dapi-test-pod.yaml
 ```
+
+### Define container environment variables with data from multiple ConfigMaps
+
+Define env-config configmap:
+```bash
+kubectl create configmap env-config --from-literal=log_level=INFO
+```
+
+Create the pod:
+```bash
+kubectl create -f pods/dapi-test-pod-env.yaml
+```
+
+Get output:
+```bash
+k logs dapi-test-pod-env | grep SPECIAL_LEVEL_KEY
+SPECIAL_LEVEL_KEY=very
+```
+
+### Use ConfigMap-defined environment variables in Pod commands
+
+Create the pod:
+```bash
+k create -f pods/dapi-test-pod-command.yaml
+```
+
+Get output:
+```bash
+k logs  dapi-test-pod-command
+thespecialLevel specialType
+```
+
+### Add ConfigMap data to a Volume
+
+Create the pod:
+```bash
+k create -f pods/dapi-test-pod-volume.yaml
+```
+
+Get /etc/config
+```bash
+k logs  dapi-test-pod-volume
+SPECIAL_LEVEL
+SPECIAL_TYPE
+special.how
+special.level
+special.type
+```
+
+### Add ConfigMap data to a specific path in the Volume
+
+Create the pod:
+```bash
+k logs dapi-test-configs
+very
+```
+
+## Share Process Namespace between Containers in a Pod
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/)
+
+This is a beta feature.
 
 ```bash
 ```
