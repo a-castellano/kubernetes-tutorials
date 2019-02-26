@@ -793,6 +793,113 @@ goproxy   0/1     Running   0          6s
 goproxy   1/1   Running   0     13s
 ```
 
+### Assign Pods to Nodes
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/)
+
+#### Add a label to a node
+
+Get nodes:
+```bash
+kubectl get nodes
+
+NAME                           STATUS                     ROLES    AGE     VERSION
+kubernetes-master              Ready,SchedulingDisabled   <none>   3m43s   v1.13.3
+kubernetes-minion-group-9g79   Ready                      <none>   3m34s   v1.13.3
+kubernetes-minion-group-r7st   Ready                      <none>   3m33s   v1.13.3
+kubernetes-minion-group-s881   Ready                      <none>   3m40s   v1.13.3
+```
+
+Chose one of your nodes, and add a label to it:
+```bash
+kubectl label nodes kubernetes-minion-group-9g79 disktype=ssd
+```
+
+Check label:
+```bash
+kubectl get nodes --show-labels | grep disk
+kubernetes-minion-group-9g79   Ready                      <none>   5m38s   v1.13.3   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/fluentd-ds-ready=true,beta.kubernetes.io/instance-type=n1-standard-2,beta.kubernetes.io/os=linux,disktype=ssd,failure-domain.beta.kubernetes.io/region=us-central1,failure-domain.beta.kubernetes.io/zone=us-central1-b,kubernetes.io/hostname=kubernetes-minion-group-9g79
+```
+
+#### Create a pod that gets scheduled to your chosen node
+
+Create the pod:
+```bash
+kubectl create -f pods/pod-nginx.yaml
+```
+
+Verify that the pod is running on your chosen node:
+```bash
+kubectl get pods --output=wide
+NAME    READY   STATUS    RESTARTS   AGE   IP          NODE                           NOMINATED NODE   READINESS GATES
+nginx   1/1     Running   0          35s   10.64.2.5   kubernetes-minion-group-9g79   <none>           <none>
+```
+
+### Configure Pod Initialization
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-initialization/)
+
+#### Create a Pod that has an Init Container
+
+Create the pod:
+```bash
+kubectl create -f pods/init-containers.yaml
+```
+
+Get pods:
+```bash
+kubectl get pod init-demo
+```
+
+Enter the pod and perform a curl request:
+```bash
+kubectl exec -it init-demo -- /bin/bash
+apt-get update
+apt-get install curl
+curl localhost
+```
+
+### Attach Handlers to Container Lifecycle Events
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/)
+
+#### Define postStart and preStop handlers
+
+Create the pod:
+```bash
+kubectl create -f pods/lifecycle-events.yaml
+```
+
+Verify that PostStart command worked:
+```bash
+kubectl exec -it lifecycle-demo -- cat /usr/share/message
+Hello from the postStart handler
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
 ```bash
 ```
 
