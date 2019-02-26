@@ -621,28 +621,176 @@ kubectl create -f pods/security/security-context-4.yaml
 [Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 
 #### Use the Default Service Account to access the API server
+
+By default, servie account is 'default'
+
+```bash
+kubectl get pods redis -o yaml | grep serviceAccountName
+  serviceAccountName: default
+```
+
 #### Use Multiple Service Accounts
+
+Get service accounts:
+```bash
+kubectl get serviceAccounts
+NAME                                    SECRETS   AGE
+default                                 1         2d19h
+nginx-ingress-microk8s-serviceaccount   1         2d19h
+```
+
+Create serviceAccount:
+```bash
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+EOF
+```
+
+Check serviceAccount:
+```bash
+kubectl get serviceaccounts/build-robot -o yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2019-02-25T16:40:02Z"
+  name: build-robot
+  namespace: default
+  resourceVersion: "2208326"
+  selfLink: /api/v1/namespaces/default/serviceaccounts/build-robot
+  uid: ff37cb4a-391b-11e9-b481-5254000baa03
+secrets:
+- name: build-robot-token-pgkl7
+```
+
+To use a non-default service account, simply set the spec.serviceAccountName field of a pod to the name of the service account you wish to use.
+
+Delete service account:
+```bash
+kubectl delete serviceaccount/build-robot
+```
+
 #### Manually create a service account API token.
+
+Create service account again:
+```bash
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+EOF
+```
+
+Create a secret:
+```bash
+kubectl create -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: build-robot-secret
+  annotations:
+    kubernetes.io/service-account.name: build-robot
+type: kubernetes.io/service-account-token
+EOF
+```
+
+Get your secret
+```bash
+kubectl describe secrets/build-robot-secret
+Name:         build-robot-secret
+Namespace:    default
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: build-robot
+              kubernetes.io/service-account.uid: 2b208294-391d-11e9-b481-5254000baa03
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+namespace:  7 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImJ1aWxkLXJvYm90LXNlY3JldCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJidWlsZC1yb2JvdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjJiMjA4Mjk0LTM5MWQtMTFlOS1iNDgxLTUyNTQwMDBiYWEwMyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmJ1aWxkLXJvYm90In0.bBSFqzHXQRSYeP3QykI23_rifQ_OnO5oajN1jjGE8-1GZpOHgoMc6NHSAFqkboMqf4SFGmE5FP8zdncmQk8e6CVTR_W2ayOfqU0sIzt85LHs65XFgpHyu64w0ouqZ9mXcegxFSLNIyelWe2CuEEkZqreuhSMjwEvnNz8XgM5Zj013k9ZvnQZ38dczwVvEuanoaAZSMEVVh8KgijDTlzDMaAUdHWFGjcncuI8Zw9uplCS_5BFrKtOEGWVSq5tVnyPlHwtR8a2gujAcLJ-DHD3-d0lsNeuWD6v4wSt0UrygIV7aX-tTk7OPxJW2bsCyOPzVz4O2mwFAezERmZpkX89dQ
+ca.crt:     1094 bytes
+```
+
 #### Add ImagePullSecrets to a service account
-#### Service Account Token Volume Projection
 
-
+Create a secret:
 ```bash
+kubectl create secret docker-registry myregistrykey --docker-server=DOCKER_REGISTRY_SERVER --docker-username=DOCKER_USER --docker-password=DOCKER_PASSWORD --docker-email=DOCKER_EMAIL
+```
+
+Get secret:
+```bash
+kubectl get secrets myregistrykey
+NAME            TYPE                             DATA   AGE
+myregistrykey   kubernetes.io/dockerconfigjson   1      4m30s
+```
+
+Modify the default service account for the namespace to use this secret as an imagePullSecret.
+```bash
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "myregistrykey"}]}'
+```
+
+### Configure Liveness and Readiness Probes
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/)
+
+
+#### Define a liveness command
+
+Create the pod:
+```bash
+kubectl create -f pods/probe/exec-liveness.yaml
+```
+
+Check that continer is killed:
+```bash
+kubectl describe pod liveness-exec
+
+  Type     Reason     Age                From                             Message
+  ----     ------     ----               ----                             -------
+  Normal   Scheduled  86s                default-scheduler                Successfully assigned default/liveness-exec to k8.daedalus-project.io
+  Warning  Unhealthy  36s (x3 over 46s)  kubelet, k8.daedalus-project.io  Liveness probe failed: cat: can't open '/tmp/healthy': No such file or directory
+  Normal   Pulling    5s (x2 over 84s)   kubelet, k8.daedalus-project.io  pulling image "k8s.gcr.io/busybox"
+  Normal   Killing    5s                 kubelet, k8.daedalus-project.io  Killing container with id docker://liveness:Container failed liveness probe.. Container will be killed and recreated.
+  Normal   Pulled     4s (x2 over 82s)   kubelet, k8.daedalus-project.io  Successfully pulled image "k8s.gcr.io/busybox"
+  Normal   Created    4s (x2 over 81s)   kubelet, k8.daedalus-project.io  Created container
+  Normal   Started    3s (x2 over 81s)   kubelet, k8.daedalus-project.io  Started container
+```
+
+Check http Liveness
+```bash
+kubectl create -f pods/probe/http-liveness.yaml
 ```
 
 ```bash
+kubectl describe pod liveness-http
+
+Events:
+  Type     Reason     Age               From                             Message
+  ----     ------     ----              ----                             -------
+  Normal   Scheduled  53s               default-scheduler                Successfully assigned default/liveness-http to k8.daedalus-project.io
+  Warning  Unhealthy  5s (x6 over 32s)  kubelet, k8.daedalus-project.io  Liveness probe failed: HTTP probe failed with statuscode: 500
+  Normal   Pulling    4s (x3 over 46s)  kubelet, k8.daedalus-project.io  pulling image "k8s.gcr.io/liveness"
+  Normal   Killing    4s (x2 over 25s)  kubelet, k8.daedalus-project.io  Killing container with id docker://liveness:Container failed liveness probe.. Container will be killed and recreated.
+  Normal   Pulled     3s (x3 over 45s)  kubelet, k8.daedalus-project.io  Successfully pulled image "k8s.gcr.io/liveness"
+  Normal   Created    2s (x3 over 44s)  kubelet, k8.daedalus-project.io  Created container
+  Normal   Started    2s (x3 over 44s)  kubelet, k8.daedalus-project.io  Started container
+```
+
+Define tcp liveness
+```bash
+kubectl create -f pods/probe/tcp-liveness-readiness.yaml
 ```
 
 ```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
+kubectl get pod goproxy --watch
+NAME      READY   STATUS    RESTARTS   AGE
+goproxy   0/1     Running   0          6s
+goproxy   1/1   Running   0     13s
 ```
 
 ```bash

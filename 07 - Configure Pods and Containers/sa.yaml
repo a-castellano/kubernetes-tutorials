@@ -1,0 +1,14 @@
+apiVersion: v1
+imagePullSecrets:
+- name: myregistrykey
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2019-02-22T21:26:30Z"
+  name: default
+  namespace: default
+  selfLink: /api/v1/namespaces/default/serviceaccounts/default
+  uid: 84f82e24-36e8-11e9-843c-5254000baa03
+secrets:
+- name: default-token-rf5pv
+imagePullSecrets:
+- name: myregistrykey
