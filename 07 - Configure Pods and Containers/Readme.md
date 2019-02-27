@@ -1090,29 +1090,57 @@ very
 
 This is a beta feature.
 
+Create the pod:
 ```bash
+k create -f pods/share-process-namespace.yaml
 ```
 
+## Translate a Docker Compose File to Kubernetes Resources
+
+[Link](https://kubernetes.io/docs/tasks/configure-pod-container/translate-compose-kubernetes/)
+
+Install [kompose](http://kompose.io/).
+
+Deploy
 ```bash
+ kompose up
+  We are going to create Kubernetes Deployments, Services and PersistentVolumeClaims for your Dockerized application.
+  If you need different kind of resources, use the 'kompose convert' and 'kubectl create -f' commands instead.
+
+  INFO Successfully created Service: redis          
+  INFO Successfully created Service: web            
+  INFO Successfully created Deployment: redis       
+  INFO Successfully created Deployment: web         
+
+  Your application has been deployed to Kubernetes. You can run 'kubectl get deployment,svc,pods,pvc' for details.
 ```
 
+Check
 ```bash
+kubectl get deployment,svc,pods,pvc
+NAME                                         READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.extensions/frontend               1/1     1            1           2m39s
+deployment.extensions/redis-master           1/1     1            1           2m39s
+deployment.extensions/redis-slave            1/1     1            1           2m39s
+
+NAME                           TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+service/frontend               LoadBalancer   10.152.183.43    <pending>     80:30998/TCP   2m39s
+service/redis-master           ClusterIP      10.152.183.242   <none>        6379/TCP       2m39s
+service/redis-slave            ClusterIP      10.152.183.144   <none>        6379/TCP       2m39s
+
+NAME                                          READY   STATUS             RESTARTS   AGE
+pod/frontend-784f75ddb7-wtg5f                 1/1     Running            0          2m39s
+pod/redis-master-97979696c-wbmhg              1/1     Running            0          2m39s
+pod/redis-slave-6fd879d46c-9srqx              1/1     Running            0          2m39s
 ```
 
+Convert docker composer to kubernetes file:
 ```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
+kompose convert
+  INFO Kubernetes file "frontend-service.yaml" created
+  INFO Kubernetes file "redis-master-service.yaml" created
+  INFO Kubernetes file "redis-slave-service.yaml" created
+  INFO Kubernetes file "frontend-deployment.yaml" created
+  INFO Kubernetes file "redis-master-deployment.yaml" created
+  INFO Kubernetes file "redis-slave-deployment.yaml" created
 ```
