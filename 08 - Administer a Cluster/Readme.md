@@ -83,6 +83,92 @@ Limit value is namespace default limit.
 
 [Link](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-default-namespace/)
 
+Create a namespace
+```bash
+k create namespace default-cpu-example
+```
+
+Create LimitRange object inside our namespace:
+```bash
+k create -f admin/resource/cpu-defaults.yaml -n default-cpu-example
+```
+
+Create a container without default limits neither requests.
+```bash
+k create -f admin/resource/cpu-defaults-pod.yaml -n default-cpu-example
+```
+
+Check limits:
+```bash
+k get pod default-cpu-demo --output=yaml -n default-cpu-example
+
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: default-cpu-demo-ctr
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: 500m
+```
+
+Specify limit but no requests
+```bash
+k create -f admin/resource/cpu-defaults-pod-2.yaml -n default-cpu-example
+```
+
+Check limits
+```bash
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: default-cpu-demo-2-ctr
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "1"
+```
+
+I think that specifiying only limit (and get same request) is not a good idea.
+
+
+Specify only requests:
+```bash
+k create -f admin/resource/cpu-defaults-pod-3.yaml -n default-cpu-example
+```
+
+Check limits:
+```bash
+k get pod default-cpu-demo-3 --output=yaml -n default-cpu-example
+
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: default-cpu-demo-3-ctr
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: 750m
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
 ```bash
 ```
 
