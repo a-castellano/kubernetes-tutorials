@@ -554,22 +554,6 @@ Delete namespace:
 kubectl delete namespace quota-pod-example
 ```
 
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-
 ## Advertise Extended Resources for a Node
 
 [Link](https://kubernetes.io/docs/tasks/administer-cluster/extended-resource-node/)
