@@ -271,7 +271,287 @@ k delete pod constraints-mem-demo-4 -n constraints-mem-example
 
 [Link](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/cpu-constraint-namespace/)
 
+Create a namespace
 ```bash
+k create namespace constraints-cpu-example
+```
+Create a limit range (LimitRange):
+```bash
+k create -f admin/resource/cpu-constraints.yaml -n constraints-cpu-example
+```
+
+Verify constraints:
+```bash
+k get limitrange cpu-min-max-demo-lr --output=yaml -n constraints-cpu-example
+apiVersion: v1
+kind: LimitRange
+metadata:
+  creationTimestamp: "2019-02-28T16:31:02Z"
+  name: cpu-min-max-demo-lr
+  namespace: constraints-cpu-example
+  resourceVersion: "2539295"
+  selfLink: /api/v1/namespaces/constraints-cpu-example/limitranges/cpu-min-max-demo-lr
+  uid: 3ce3e37f-3b76-11e9-b54b-5254000baa03
+spec:
+  limits:
+  - default:
+      cpu: 800m
+    defaultRequest:
+      cpu: 800m
+    max:
+      cpu: 800m
+    min:
+      cpu: 200m
+    type: Container
+```
+Note: When creating a LimitRange object, you can specify limits on huge-pages or GPUs as well. However, when both default and defaultRequest are specified on these resources, the two values must be the same.
+
+Create a pod that satisfies limits:
+```bash
+k create -f admin/resource/cpu-constraints-pod.yaml -n constraints-cpu-example
+```
+
+Chack that pod is running:
+```bash
+k get pod constraints-cpu-demo -n constraints-cpu-example
+NAME                   READY   STATUS    RESTARTS   AGE
+constraints-cpu-demo   1/1     Running   0          101s
+```
+
+Check constraints:
+```bash
+k get pod constraints-cpu-demo --output=yaml -n constraints-cpu-example
+
+spec:
+  containers:
+  - image: nginx
+    imagePullPolicy: Always
+    name: constraints-cpu-demo-ctr
+    resources:
+      limits:
+        cpu: 800m
+      requests:
+        cpu: 500m
+```
+
+Delete the Pod
+```bash
+k delete pod constraints-cpu-demo -n constraints-cpu-example
+```
+
+Attempt to create a Pod that exceeds the maximum CPU constraint
+```bash
+k create -f admin/resource/cpu-constraints-pod-2.yaml -n constraints-cpu-example
+Error from server (Forbidden): error when creating "admin/resource/cpu-constraints-pod-2.yaml": pods "constraints-cpu-demo-2" is forbidden: maximum cpu usage per Container is 800m, but limit is 1500m.
+```
+
+Attempt to create a Pod that does not meet the minimum CPU request
+```bash
+k create -f admin/resource/cpu-constraints-pod-3.yaml -n constraints-cpu-example
+Error from server (Forbidden): error when creating "admin/resource/cpu-constraints-pod-3.yaml": pods "constraints-cpu-demo-4" is forbidden: minimum cpu usage per Container is 200m, but request is 100m.
+```
+
+Create a Pod that does not specify any CPU request or limit
+```bash
+ k create -f admin/resource/cpu-constraints-pod-4.yaml -n constraints-cpu-example
+```
+
+Get pod limits:
+```bash
+k get pod constraints-cpu-demo-4 -n constraints-cpu-example --output=yaml
+
+spec:
+  containers:
+  - image: vish/stress
+    imagePullPolicy: Always
+    name: constraints-cpu-demo-4-ctr
+    resources:
+      limits:
+        cpu: 800m
+      requests:
+        cpu: 800m
+```
+
+Delete pod:
+```bash
+k delete pod constraints-cpu-demo-4 -n constraints-cpu-example
+```
+
+### Configure Memory and CPU Quotas for a Namespace
+
+[Link](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/)
+
+Create a namespace
+```bash
+k create namespace quota-mem-cpu-example
+```
+
+Set quotas:
+```bash
+k create -f admin/resource/quota-mem-cpu.yaml -n quota-mem-cpu-example
+```
+
+Show quotas:
+```bash
+k get resourcequota mem-cpu-demo -n quota-mem-cpu-example --output=yaml
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  creationTimestamp: "2019-02-28T18:26:47Z"
+  name: mem-cpu-demo
+  namespace: quota-mem-cpu-example
+  resourceVersion: "2548517"
+  selfLink: /api/v1/namespaces/quota-mem-cpu-example/resourcequotas/mem-cpu-demo
+  uid: 68997de0-3b86-11e9-b54b-5254000baa03
+spec:
+  hard:
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    requests.cpu: "1"
+    requests.memory: 1Gi
+status:
+  hard:
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    requests.cpu: "1"
+    requests.memory: 1Gi
+  used:
+    limits.cpu: "0"
+    limits.memory: "0"
+    requests.cpu: "0"
+    requests.memory: "0"
+```
+
+Create a pod:
+```bash
+k create -f admin/resource/quota-mem-cpu-pod.yaml -n quota-mem-cpu-example
+```
+
+Verify that the Pod’s Container is running:
+```bash
+k get pod quota-mem-cpu-demo -n quota-mem-cpu-example
+NAME                 READY   STATUS    RESTARTS   AGE
+quota-mem-cpu-demo   1/1     Running   0          49s
+```
+
+View detailed information about the ResourceQuota
+```bash
+k get resourcequota mem-cpu-demo -n quota-mem-cpu-example --output=yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  creationTimestamp: "2019-02-28T18:26:47Z"
+  name: mem-cpu-demo
+  namespace: quota-mem-cpu-example
+  resourceVersion: "2548841"
+  selfLink: /api/v1/namespaces/quota-mem-cpu-example/resourcequotas/mem-cpu-demo
+  uid: 68997de0-3b86-11e9-b54b-5254000baa03
+spec:
+  hard:
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    requests.cpu: "1"
+    requests.memory: 1Gi
+status:
+  hard:
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    requests.cpu: "1"
+    requests.memory: 1Gi
+  used:
+    limits.cpu: 800m
+    limits.memory: 800Mi
+    requests.cpu: 400m
+    requests.memory: 600Mi
+```
+
+Attempt to create a second pod:
+```bash
+k create -f admin/resource/quota-mem-cpu-pod-2.yaml -n quota-mem-cpu-example
+Error from server (Forbidden): error when creating "admin/resource/quota-mem-cpu-pod-2.yaml": pods "quota-mem-cpu-demo-2" is forbidden: exceeded quota: mem-cpu-demo, requested: requests.memory=700Mi, used: requests.memory=600Mi, limited: requests.memory=1Gi
+```
+
+### Configure a Pod Quota for a Namespace
+
+[Link](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-pod-namespace/)
+
+Create a namespace
+```bash
+k create namespace quota-pod-example
+```
+
+Create a ResourceQuota
+```bash
+k create -f admin/resource/quota-pod.yaml -n quota-pod-example
+```
+
+View detailed information about the ResourceQuota:
+```bash
+k get resourcequota pod-demo -n quota-pod-example --output=yaml
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  creationTimestamp: "2019-02-28T18:43:58Z"
+  name: pod-demo
+  namespace: quota-pod-example
+  resourceVersion: "2549897"
+  selfLink: /api/v1/namespaces/quota-pod-example/resourcequotas/pod-demo
+  uid: cf3c20ff-3b88-11e9-b54b-5254000baa03
+spec:
+  hard:
+    pods: "2"
+status:
+  hard:
+    pods: "2"
+  used:
+    pods: "0"
+```
+
+Create a deploymnet:
+```bash
+k create -f admin/resource/quota-pod-deployment.yaml -n quota-pod-example
+
+deployment.apps/pod-quota-demo created
+```
+
+Get deployment info:
+```bash
+k get deployment pod-quota-demo -n quota-pod-example --output=yaml
+
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: "2019-02-28T18:46:01Z"
+    lastUpdateTime: "2019-02-28T18:46:01Z"
+    message: Deployment does not have minimum availability.
+    reason: MinimumReplicasUnavailable
+    status: "False"
+    type: Available
+  - lastTransitionTime: "2019-02-28T18:46:01Z"
+    lastUpdateTime: "2019-02-28T18:46:01Z"
+    message: 'pods "pod-quota-demo-7ccf944558-wsjlk" is forbidden: exceeded quota:
+      pod-demo, requested: pods=1, used: pods=2, limited: pods=2'
+    reason: FailedCreate
+    status: "True"
+    type: ReplicaFailure
+  - lastTransitionTime: "2019-02-28T18:46:01Z"
+    lastUpdateTime: "2019-02-28T18:46:09Z"
+    message: ReplicaSet "pod-quota-demo-7ccf944558" is progressing.
+    reason: ReplicaSetUpdated
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 2
+  replicas: 2
+  unavailableReplicas: 1
+  updatedReplicas: 2
+```
+
+Delete namespace:
+```bash
+kubectl delete namespace quota-pod-example
 ```
 
 ```bash
@@ -289,23 +569,6 @@ k delete pod constraints-mem-demo-4 -n constraints-mem-example
 ```bash
 ```
 
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
 
 ## Advertise Extended Resources for a Node
 
