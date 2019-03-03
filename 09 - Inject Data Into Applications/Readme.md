@@ -218,7 +218,7 @@ k logs kubernetes-downwardapi-volume-example-2
 32
 ```
 
-Distribute Credentials Securely Using Secrets
+## Distribute Credentials Securely Using Secrets
 
 [Link](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
 
@@ -297,98 +297,38 @@ SECRET_USERNAME=my-app
 SECRET_PASSWORD=39528$vdg7Jb
 ```
 
-```bash
-```
+## Inject Information into Pods Using a PodPreset
+
+[Link](https://kubernetes.io/docs/tasks/inject-data-application/podpreset/)
+
+Enable pod presets.
+
+Using GCE cluster:
 
 ```bash
+gcloud compute --project YOURPROJECT ssh --zone YOURZONE "kubernetes-master"
 ```
 
+As root, edit */etc/kubernetes/manifests/kube-apiserver.manifest*
+
+In command section add
 ```bash
+--runtime-config=settings.k8s.io/v1alpha1=true
 ```
 
-```bash
-```
+Wait until apiserver becomes available again
 
 ```bash
+kubectl get pod kube-apiserver-kubernetes-master  -n kube-system
+NAME                               READY   STATUS    RESTARTS   AGE
+kube-apiserver-kubernetes-master   1/1     Running   0          46s
 ```
 
+Create a pod preset:
 ```bash
+k create -f podpreset/preset.yaml
 ```
 
-```bash
-```
+It is not working at all. Pod does not mount aniything.
 
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
+Try again when pod presets become stable.

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Cluster
+spec:
+  kubeAPIServer:
+    runtimeConfig:
+      batch/v2alpha1: "true"
+      apps/v1alpha1: "true"
