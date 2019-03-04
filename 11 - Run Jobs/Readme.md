@@ -93,17 +93,38 @@ job.batch/jobexample-raspberry created
 
 [Link](https://kubernetes.io/docs/tasks/job/coarse-parallel-processing-work-queue/)
 
+Start RabbitMQ as follows:
 ```bash
+k create -f examples/celery-rabbitmq/rabbitmq-service.yaml
+k create -f examples/celery-rabbitmq/rabbitmq-controller.yaml
 ```
 
+Testing the message queue service
 ```bash
+k run -i --tty temp --image ubuntu:18.04
+apt-get update
+apt-get install -y curl ca-certificates amqp-tools python dnsutils
+
+export BROKER_URL=amqp://guest:guest@rabbitmq-service:5672
+/usr/bin/amqp-declare-queue --url=$BROKER_URL -q foo -d
+/usr/bin/amqp-publish --url=$BROKER_URL -r foo -p -b Hello
+/usr/bin/amqp-consume --url=$BROKER_URL -q foo -c 1 cat && echo
 ```
 
+Filling the Queue with tasks
 ```bash
+/usr/bin/amqp-declare-queue --url=$BROKER_URL -q job1  -d
+for f in apple banana cherry date fig grape lemon melon; do /usr/bin/amqp-publish --url=$BROKER_URL -r job1 -p -b $f; done
 ```
 
+Create job
 ```bash
+k create -f application/job/rabbitmq/job.yaml
 ```
+
+## Fine Parallel Processing Using a Work Queue
+
+[Link](https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/)
 
 ```bash
 ```
