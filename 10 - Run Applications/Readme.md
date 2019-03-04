@@ -355,51 +355,62 @@ Delete deplyment:
 k delete  deployment patch-demo
 ```
 
-## Scale a StatefulSet
+## Horizontal Pod Autoscaler Walkthrough
 
-[Link](https://kubernetes.io/docs/tasks/run-application/scale-stateful-set/)
+[Link](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)
 
+Run & expose php-apache server
 ```bash
+k run php-apache --image=k8s.gcr.io/hpa-example --requests=cpu=200m --expose --port=80
+
+kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --generator=run-pod/v1 or kubectl create instead.
+service/php-apache created
+deployment.apps/php-apache created
 ```
 
+Set autoscale policy:
 ```bash
+k autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
 ```
 
+Get hpa
 ```bash
+kubectl get hpa
+NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache   0%/50%    1         10        1          81s
 ```
 
+Increase load:
 ```bash
+k run -i --tty load-generator --image=busybox /bin/sh
+
+while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
 ```
 
+hpa works!
 ```bash
+kubectl get hpa
+NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache   57%/50%   1         10        2          4m50s
 ```
 
+Get pods
 ```bash
+php-apache-84cc7f889b-fgx9w               1/1     Running   0          72s
+php-apache-84cc7f889b-gnshr               1/1     Running   0          8m56s
+php-apache-84cc7f889b-htvlz               1/1     Running   0          11s
+php-apache-84cc7f889b-rwmnq               1/1     Running   0          12s
 ```
 
-```bash
-```
+Stop load killing load-generator and wait:
 
 ```bash
+kubectl get hpa
+NAME         REFERENCE               TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+php-apache   Deployment/php-apache   0%/50%    1         10        1          14m
 ```
 
+Using file to create HPA
 ```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
+k create -f application/hpa/php-apache.yaml
 ```
