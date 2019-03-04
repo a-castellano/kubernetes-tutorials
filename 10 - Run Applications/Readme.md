@@ -284,6 +284,108 @@ persistentvolumeclaim "data-mysql-4" deleted
 
 [Link](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/)
 
+Use a strategic merge patch to update a Deployment
+```bash
+k create -f application/deployment-patch.yaml
+```
+
+Get pods:
+```bash
+k get pods -l app=nginx
+NAME                          READY   STATUS    RESTARTS   AGE
+patch-demo-5b5c885dc9-md85b   1/1     Running   0          91s
+patch-demo-5b5c885dc9-vkqkw   1/1     Running   0          91s
+```
+
+Patch pods adding a new container:
+```bash
+k patch deployment patch-demo --patch "$(cat application/patch-file-containers.yaml)"
+```
+
+Old pods have been terminated
+```bash
+k get pods -l app=nginx
+
+NAME                          READY   STATUS    RESTARTS   AGE
+patch-demo-69c77dd57d-v4bh2   2/2     Running   0          84s
+patch-demo-69c77dd57d-x99rx   2/2     Running   0          98s
+```
+
+Patch deployment again:
+```bash
+k patch deployment patch-demo --patch "$(cat application/patch-file-tolerations.yaml)"
+```
+
+Tolerations has been replaced:
+```yaml
+      tolerations:
+      - effect: NoSchedule
+        key: dedicated
+        value: test-team
+```
+
+by
+
+```yaml
+      tolerations:
+      - effect: NoSchedule
+        key: disktype
+        value: ssd
+```
+
+Path using json merge stategy:
+```bash
+k patch deployment patch-demo --type merge --patch "$(cat application/patch-file-2.yaml)"
+```
+
+Our containers have changed:
+```yaml
+    spec:
+      containers:
+      - image: gcr.io/google-samples/node-hello:1.0
+        imagePullPolicy: IfNotPresent
+        name: patch-demo-ctr-3
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+```
+
+Delete deplyment:
+```bash
+k delete  deployment patch-demo
+```
+
+## Scale a StatefulSet
+
+[Link](https://kubernetes.io/docs/tasks/run-application/scale-stateful-set/)
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
+```bash
+```
+
 ```bash
 ```
 
