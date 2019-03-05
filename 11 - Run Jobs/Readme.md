@@ -126,26 +126,101 @@ k create -f application/job/rabbitmq/job.yaml
 
 [Link](https://kubernetes.io/docs/tasks/job/fine-parallel-processing-work-queue/)
 
+Create redis pod and service:
 ```bash
+k create -f application/job/redis/redis-pod.yaml
+k create -f application/job/redis/redis-service.yaml
 ```
 
+Filling the Queue with tasks
 ```bash
+k run -i --tty temp --image redis --command "/bin/sh"
 ```
 
+Fill queue:
 ```bash
+# redis-cli -h redis
+redis:6379> rpush job2 "apple"
+(integer) 1
+redis:6379> rpush job2 "banana"
+(integer) 2
+redis:6379> rpush job2 "cherry"
+(integer) 3
+redis:6379> rpush job2 "date"
+(integer) 4
+redis:6379> rpush job2 "fig"
+(integer) 5
+redis:6379> rpush job2 "grape"
+(integer) 6
+redis:6379> rpush job2 "lemon"
+(integer) 7
+redis:6379> rpush job2 "melon"
+(integer) 8
+redis:6379> rpush job2 "orange"
+(integer) 9
+redis:6379> lrange job2 0 -1
+1) "apple"
+2) "banana"
+3) "cherry"
+4) "date"
+5) "fig"
+6) "grape"
+7) "lemon"
+8) "melon"
+9) "orange"
 ```
 
+Create a job:
 ```bash
+k create -f  application/job/redis/job.yaml
 ```
 
+Check jobs:
 ```bash
+kubectl describe jobs/job-wq-2
+Name:           job-wq-2
+Namespace:      default
+Selector:       controller-uid=b59f4c88-3f07-11e9-970d-5254000baa03
+Labels:         controller-uid=b59f4c88-3f07-11e9-970d-5254000baa03
+                job-name=job-wq-2
+Annotations:    <none>
+Parallelism:    2
+Completions:    <unset>
+Start Time:     Tue, 05 Mar 2019 06:29:56 +0100
+Completed At:   Tue, 05 Mar 2019 06:31:27 +0100
+Duration:       91s
+Pods Statuses:  0 Running / 2 Succeeded / 0 Failed
+Pod Template:
+  Labels:  controller-uid=b59f4c88-3f07-11e9-970d-5254000baa03
+           job-name=job-wq-2
+  Containers:
+   c:
+    Image:        acastellano/job-wq-2
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age   From            Message
+  ----    ------            ----  ----            -------
+  Normal  SuccessfulCreate  117s  job-controller  Created pod: job-wq-2-ztbsl
+  Normal  SuccessfulCreate  117s  job-controller  Created pod: job-wq-2-4cxv6
 ```
 
+Check logs:
 ```bash
-```
-
-```bash
-```
-
-```bash
+k logs job-wq-2-ztbsl
+Worker with sessionID: 8f687746-8cbf-45b2-98fc-15bad1594442
+Initial queue state: empty=False
+Working on melon
+Working on grape
+Working on date
+Working on banana
+Waiting for work
+Waiting for work
+Waiting for work
+Waiting for work
+Waiting for work
+Queue empty, exiting
 ```
