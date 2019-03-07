@@ -38,19 +38,159 @@ PONG
 ```
 
 ## Use a Service to Access an Application in a Cluster
+
 [Link](https://kubernetes.io/docs/tasks/access-application-cluster/service-access-application-cluster/)
 
+Run a Hello World application in your cluster:
 ```bash
+k run hello-world --replicas=2 --labels="run=load-balancer-example" --image=gcr.io/google-samples/node-hello:1.0  --port=8080
+```
+
+Create a Service object that exposes the deployment:
+```bash
+k expose deployment hello-world --type=NodePort --name=example-service
+```
+
+Show service:
+```bash
+k describe services example-service
+```
+
+List the pods that are running the Hello World application:
+```bash
+k get pods --selector="run=load-balancer-example" --output=wide
+
+NAME                           READY   STATUS    RESTARTS   AGE     IP          NODE                           NOMINATED NODE   READINESS GATES
+hello-world-696b6b59bd-wvw69   1/1     Running   0          5m29s   10.64.3.3   kubernetes-minion-group-6kpw   <none>           <none>
+hello-world-696b6b59bd-ztgd9   1/1     Running   0          5m29s   10.64.2.4   kubernetes-minion-group-rkxp   <none>           <none>
+```
+
+Check node port
+```bash
+kubectl describe services example-service
+Name:                     example-service
+Namespace:                default
+Labels:                   run=load-balancer-example
+Annotations:              <none>
+Selector:                 run=load-balancer-example
+Type:                     NodePort
+IP:                       10.0.196.62
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  30956/TCP
+Endpoints:                10.64.2.4:8080,10.64.3.3:8080
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+Check webapp
+```bash
+curl http://35.193.51.51:30956/
+Hello Kubernetes!
+```
+
+## Connect a Front End to a Back End Using a Service
+
+[Link](https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/)
+
+Create the backend Deployment:
+```bash
+k create -f service/access/hello.yaml
+```
+
+Create service:
+```bash
+k create -f service/access/hello-service.yaml
+```
+
+Create the frontend
+```bash
+k create -f service/access/frontend.yaml
+```
+
+## Set up Ingress on Minikube with the NGINX Ingress Controller
+
+[Link](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/)
+
+Verify that the NGINX Ingress controller is running
+```bash
+k get pods | grep nginx
+nginx-ingress-microk8s-controller-njzmh   1/1     Running   0          34h
+```
+
+### Deploy a hello, world app
+
+Create a Deployment using the following command:
+```bash
+k run web --image=gcr.io/google-samples/hello-app:1.0 --port=8080
+```
+
+Expose the Deployment:
+```bash
+k expose deployment web --target-port=8080 --type=NodePort
+```
+
+Check:
+```bash
+curl -IL YOUR_IP:PORT
+HTTP/1.1 200 OK
+Date: Thu, 07 Mar 2019 05:03:58 GMT
+Content-Length: 60
+Content-Type: text/plain; charset=utf-8
 ```
 
 ```bash
+k create -f ingress/example-ingress.yaml
+```
+
+Verify ingress:
+```bash
+kubectl get ingress
+NAME              HOSTS              ADDRESS     PORTS   AGE
+example-ingress   hello-world.info   127.0.0.1   80      66s
 ```
 
 ```bash
+curl hello-world.info
+Hello, world!
+Version: 1.0.0
+Hostname: web-77656d79f8-5rtzk
+```
+
+Create Second Deployment
+```bash
+k run web2 --image=gcr.io/google-samples/hello-app:2.0 --port=8080
+```
+
+Expose deployment:
+```bash
+k expose deployment web2 --target-port=8080 --type=NodePort
+```
+
+Update ingress
+```bash
+k apply -f ingress/example-ingress2.yaml
+```
+
+Check
+```bash
+curl hello-world.info
+Hello, world!
+Version: 1.0.0
+Hostname: web-77656d79f8-5rtzk
 ```
 
 ```bash
+curl hello-world.info/v2
+Hello, world!
+Version: 2.0.0
+Hostname: web2-675cf6d7b9-pk7g5
 ```
+
+## Communicate Between Containers in the Same Pod Using a Shared Volume
+
+[Link](https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/)
 
 ```bash
 ```
