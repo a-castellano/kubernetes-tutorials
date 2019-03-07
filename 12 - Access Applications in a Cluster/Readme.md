@@ -192,29 +192,63 @@ Hostname: web2-675cf6d7b9-pk7g5
 
 [Link](https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/)
 
+Creating a Pod that runs two Containers
 ```bash
+k create -f pods/two-container-pod.yaml
 ```
 
+Debian container only creates index.html
 ```bash
+kubectl get pod two-containers --output=yaml
+
+  containerStatuses:
+  - containerID: docker://e029c030bb23672d9889f5fe812622868228a0c27fbf55593261c60184a5eea1
+    image: debian:latest
+    imageID: docker-pullable://debian@sha256:72e996751fe42b2a0c1e6355730dc2751ccda50564fec929f76804a6365ef5ef
+    lastState: {}
+    name: debian-container
+    ready: false
+    restartCount: 0
+    state:
+      terminated:
+        containerID: docker://e029c030bb23672d9889f5fe812622868228a0c27fbf55593261c60184a5eea1
+        exitCode: 0
+        finishedAt: "2019-03-07T05:42:24Z"
+        reason: Completed
+        startedAt: "2019-03-07T05:42:24Z"
+  - containerID: docker://c349532f85bcd67483efe446801cfeb760b588808e6e8462b36e391efbd09f69
+    image: nginx:latest
+    imageID: docker-pullable://nginx@sha256:98efe605f61725fd817ea69521b0eeb32bef007af0e3d0aeb6258c6e6fe7fc1a
+    lastState: {}
+    name: nginx-container
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: "2019-03-07T05:42:16Z"
 ```
 
+Get a shell to nginx Container:
 ```bash
+k exec -it two-containers -c nginx-container -- /bin/bash
+
+apt-get update
+apt-get install curl procps
 ```
 
+Check Nginx processes
 ```bash
+ps aux
+
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0  32656  5232 ?        Ss   05:42   0:00 nginx: master process nginx -g daemon off;
+nginx        8  0.0  0.0  33112  2480 ?        S    05:42   0:00 nginx: worker process
+root         9  0.0  0.0  18136  3236 pts/0    Ss   05:46   0:00 /bin/bash
+root      3675  0.0  0.0  36636  2816 pts/0    R+   05:49   0:00 ps aux
 ```
 
+Check Nginx
 ```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
-```
-
-```bash
+curl localhost
+Hello from the debian container
 ```
